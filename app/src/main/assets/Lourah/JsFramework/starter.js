@@ -5,6 +5,8 @@
  Packages.android.os.Looper
  .getMainLooper());
  Lourah.jsFramework = new (function(){
+  this.getRhinoVersion = () => '@@@RHINO_VERSION@@@';
+  this.getGenerated = () => '@@@GENERATED@@@';
   this.name = () => '@@@JS_APP_NAME@@@';
   this.root = () => '@@@EXTERNAL_STORAGE_DIRECTORY@@@';
   this.parentDir = () => (

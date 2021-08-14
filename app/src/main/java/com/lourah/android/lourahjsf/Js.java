@@ -17,9 +17,12 @@ import java.util.ResourceBundle;
 import org.mozilla.javascript.*;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.EvaluatorException;
-import org.mozilla.javascript.ScriptRuntime;
+//import org.mozilla.javascript.ScriptRuntime;
 
 /**
+ *
+ * @20201219: Deprecated as this issue was solved in Rhino 1.7.13
+ *
  * Js : javascript interpreter, is a JsFramework ErrorReporter to properly
  * report errors, warning & exceptions
  *
@@ -31,9 +34,9 @@ public class Js implements ErrorReporter {
 
     /**
      * To solve the issue: Messages.properties is not accessible in Rhino jar file ...
-     */
+     *
     private static class AssetMessageProvider implements ScriptRuntime.MessageProvider {
-        /**
+        **
          * was necessary to move Messages.properties files to assets directory
          * making properties files accessible as a ResourceBundle : error messages from
          * javascript compilation & interpretation can be fully correctly displayed.
@@ -43,7 +46,7 @@ public class Js implements ErrorReporter {
          * @param messageId   Entry in the messageId
          * @param arguments   of the message (variable number of arguments)
          * @return
-         */
+         *
         @Override
         public String getMessage(String messageId, Object[] arguments) {
             AssetManager assetManager = activity.getAssets();
@@ -72,6 +75,7 @@ public class Js implements ErrorReporter {
             }
         }
     }
+    */
 
     /**
      * JsObject: for the result of a javascript execution
@@ -101,11 +105,14 @@ public class Js implements ErrorReporter {
      * @param activity  Android activity where javascript interpreter is used
      */
     public Js(Activity activity) {
-        ScriptRuntime.messageProvider = new AssetMessageProvider();
+        // @20201219: Rhino 1.7.13 Makes massage provider as final
+        //ScriptRuntime.messageProvider = new AssetMessageProvider();
         // @issue: must use this.activity non statically ...
         this.activity = (JsFramework) activity;
         cx = Context.enter();
         cx.setOptimizationLevel(-1);
+        // Added for Rhino-1.7.11.jar version
+        cx.setLanguageVersion(Context.VERSION_ES6);
         System.err.println(
                 "Rhino version:"
                         + org.mozilla.javascript.Context.getCurrentContext().getImplementationVersion());

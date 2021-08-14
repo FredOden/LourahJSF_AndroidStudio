@@ -8,6 +8,7 @@ package com.lourah.android.lourahjsf;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.pm.PackageManager;
@@ -109,6 +110,8 @@ public class JsFramework
                     try {
                       // Encapsulate index.js in asset Lourah/JsFramework/starter.js
                       HashMap<String, String> starterMacros = new HashMap<>();
+                      starterMacros.put("@@@RHINO_VERSION@@@", "1.7.13");
+                      starterMacros.put("@@@GENERATED@@@", "20201219");
                       starterMacros.put("@@@JS_APP_NAME@@@", ((Button)view).getText().toString());
                       starterMacros.put("@@@EXTERNAL_STORAGE_DIRECTORY@@@", Environment.getExternalStorageDirectory().toString());
                       // jsFrameworkDirectory to be configurable in a future version ?
@@ -302,12 +305,15 @@ public class JsFramework
   @Override
   public void onResume() {
     super.onResume();
-    if (checkPermission) {
-      checkPermission = false;
-      try {
-        askForPermissions();
-      } catch(Exception e) {
-        tv.setText(e.getMessage() + stringifyStackTrace(e));
+    // @@@ PERMISSION CHECK 20201022
+    if(Build.VERSION.SDK_INT >= 23) {
+      if (checkPermission) {
+        checkPermission = false;
+        try {
+          askForPermissions();
+        } catch (Exception e) {
+          //tv.setText(e.getMessage() + stringifyStackTrace(e));
+        }
       }
     }
     androidHandler("onResume");
@@ -422,7 +428,13 @@ public class JsFramework
             permissionDialog = builder.create();
             permissionDialog.show();
           } else {
-            askForPermissions();
+            //if (checkPermission && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+            try {
+              askForPermissions();
+            } catch (Exception e) {
+              Toast.makeText(this, "CheckPermissions::" + e.getMessage(), Toast.LENGTH_LONG);
+              return;
+            }
           }
         }
       }
@@ -432,7 +444,7 @@ public class JsFramework
   /**
    * Permissions handling over Android M ...
    */
-  // @TargetApi(Build.VERSION_CODES.M)
+  @TargetApi(Build.VERSION_CODES.M)
   @SuppressLint("NewApi")
   private void askForPermissions() {
     ArrayList<String> permissions = new ArrayList<>();
