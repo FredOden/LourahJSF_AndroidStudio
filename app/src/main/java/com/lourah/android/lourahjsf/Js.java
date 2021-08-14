@@ -3,21 +3,16 @@
  *
  * @author: fred.oden@gmail.com
  */
+
 package com.lourah.android.lourahjsf;
 
-import android.app.Activity;
-import android.content.res.AssetManager;
 
-import java.io.IOException;
-import java.text.MessageFormat;
-//import java.util.Locale;
-import java.util.PropertyResourceBundle;
-import java.util.ResourceBundle;
 
 import org.mozilla.javascript.*;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.EvaluatorException;
 //import org.mozilla.javascript.ScriptRuntime;
+import android.app.Activity;
 
 /**
  *
@@ -28,54 +23,9 @@ import org.mozilla.javascript.EvaluatorException;
  *
  */
 public class Js implements ErrorReporter {
-    private Context cx;
+    static private Context cx;
     private Scriptable scope;
     private static JsFramework activity;
-
-    /**
-     * To solve the issue: Messages.properties is not accessible in Rhino jar file ...
-     *
-    private static class AssetMessageProvider implements ScriptRuntime.MessageProvider {
-        **
-         * was necessary to move Messages.properties files to assets directory
-         * making properties files accessible as a ResourceBundle : error messages from
-         * javascript compilation & interpretation can be fully correctly displayed.
-         *
-         * Todo: multilingual support
-         *
-         * @param messageId   Entry in the messageId
-         * @param arguments   of the message (variable number of arguments)
-         * @return
-         *
-        @Override
-        public String getMessage(String messageId, Object[] arguments) {
-            AssetManager assetManager = activity.getAssets();
-            try {
-                ResourceBundle resourceBundle =
-                        new PropertyResourceBundle(
-                                assetManager.open("Messages.properties")
-                        );
-
-                String formatString;
-
-                try {
-                    formatString = resourceBundle.getString(messageId);
-                } catch (java.util.MissingResourceException mre) {
-                    throw new RuntimeException(
-                            "AssetMessageProvider::no message resource for property::"
-                                    + messageId
-                    );
-                }
-
-                MessageFormat formatter = new MessageFormat(formatString);
-
-                return formatter.format(arguments);
-            } catch (IOException e) {
-                return "failed to load bundle::" + e.getMessage();
-            }
-        }
-    }
-    */
 
     /**
      * JsObject: for the result of a javascript execution
@@ -108,15 +58,17 @@ public class Js implements ErrorReporter {
         // @20201219: Rhino 1.7.13 Makes massage provider as final
         //ScriptRuntime.messageProvider = new AssetMessageProvider();
         // @issue: must use this.activity non statically ...
-        this.activity = (JsFramework) activity;
-        cx = Context.enter();
-        cx.setOptimizationLevel(-1);
-        // Added for Rhino-1.7.11.jar version
-        cx.setLanguageVersion(Context.VERSION_ES6);
-        System.err.println(
-                "Rhino version:"
-                        + org.mozilla.javascript.Context.getCurrentContext().getImplementationVersion());
-        scope = this.cx.initStandardObjects();
+        if (Js.activity == null) Js.activity = (JsFramework) activity;
+        if (Js.cx == null) {
+            Js.cx = Context.enter();
+            Js.cx.setOptimizationLevel(-1);
+            // Added for Rhino-1.7.11.jar version
+            Js.cx.setLanguageVersion(Context.VERSION_ES6);
+            System.err.println(
+                    "Rhino version:"
+                            + org.mozilla.javascript.Context.getCurrentContext().getImplementationVersion());
+        }
+        scope = Js.cx.initStandardObjects();
         ScriptableObject.putProperty(scope, "Activity", Context.javaToJS(activity, scope));
         Context.getCurrentContext().setErrorReporter(this);
     }
