@@ -283,14 +283,17 @@ public class JsFramework
     }
 
 
+    /**
+     * FO@20210815: correction of setContentView from getContentView() that might be null
+     */
     protected void doInitView() {
-        if (first) {
+        if (null == contentView) {
             createContentView();
             setContentView(contentView);
             js = new Js(this);
             first = false;
         } else {
-            setContentView(getContentView());
+            setContentView(contentView);
         }
     }
 
